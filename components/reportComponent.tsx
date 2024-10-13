@@ -73,7 +73,7 @@ const ReportComponent = (props: Props) => {
       });
       return;
     }
-    //if base 64 data does exists send API re
+    //if base 64 data does exists send API restore
     const response = await fetch("api/extractreportgemini", {
       method: "POST",
       headers: {
