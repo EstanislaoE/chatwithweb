@@ -1,9 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-// const model genAi.getGenerativeModel({
-//     model: 'gemini-1.5-pro',
-// })
 const model = genAi.getGenerativeModel({
   model: "gemini-1.5-pro",
 });
@@ -18,7 +15,6 @@ export async function POST(req: Request, res: Response) {
   console.log(generatedContent);
 
   const reportText = generatedContent.response.text();
-
   return new Response(reportText, { status: 200 });
 }
 

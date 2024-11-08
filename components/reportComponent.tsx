@@ -9,11 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { headers } from "next/headers";
 
-type Props = {};
+type Props = {
+  onReportConfirmation: (data: string) => void;
+};
 
-const ReportComponent = (props: Props) => {
+const ReportComponent = ({ onReportConfirmation }: Props) => {
   const { toast } = useToast();
   const [base64Data, setBase64Data] = useState("");
+  const [reportData, setReportData] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   function handleReportSelection(event: ChangeEvent<HTMLInputElement>): void {
     if (!event.target.files) return;
@@ -65,7 +69,7 @@ const ReportComponent = (props: Props) => {
     }
   }
 
-  async function extractDetails(): void {
+  async function extractDetails(): Promise<void> {
     if (!base64Data) {
       toast({
         description: "Upload a valid file type!",
@@ -73,6 +77,7 @@ const ReportComponent = (props: Props) => {
       });
       return;
     }
+    setIsLoading(true);
     //if base 64 data does exists send API restore
     const response = await fetch("api/extractreportgemini", {
       method: "POST",
@@ -85,7 +90,9 @@ const ReportComponent = (props: Props) => {
     });
     if (response.ok) {
       const reportText = await response.text();
-      console.log(reportText);
+      //console.log(reportText);
+      setReportData(reportText);
+      setIsLoading(false);
     }
   }
 
@@ -93,7 +100,12 @@ const ReportComponent = (props: Props) => {
     <div className="grid w-full items-start gap-6 overflow-auto p-4 pt-0">
       <fieldset className="relative grid gap-6 rounded-lg border p-4">
         <legend className="text-sm font-medium">Report</legend>
-
+        {isLoading && (
+          <div className="absoute z-10 h-full w-full bg-card/90 rounded-lg flex flex-row items-center justify-center">
+            {" "}
+            processing .. .
+          </div>
+        )}
         <Input
           className="bg-[#04a5ea]"
           type="file"
@@ -107,8 +119,19 @@ const ReportComponent = (props: Props) => {
         <Textarea
           placeholder="Extracted Data from the report will appear here."
           className="min-h-72 resize-none border-0 p-3 shadow-none "
+          value={reportData}
+          onChange={(e) => {
+            setReportData(e.target.value);
+          }}
         />
-        <Button className="bg-[#06c37e]">2. Add to Chat-Bot knowledge </Button>
+        <Button
+          className="bg-[#06c37e]"
+          onClick={() => {
+            onReportConfirmation(reportData);
+          }}
+        >
+          2. Add to Chat-Bot knowledge{" "}
+        </Button>
       </fieldset>
     </div>
   );
